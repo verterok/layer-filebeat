@@ -23,7 +23,6 @@ class TestCharm(unittest.TestCase):
         stash_address = self.unit.relation('logstash', 'logstash:filebeat')['private_address']  # noqa
         remote = self.unit.file_contents('/etc/filebeat/filebeat.yml')
         filebeat_conf = yaml.safe_load(remote)
-        import pdb; pdb.set_trace()
         self.assertTrue(stash_address in filebeat_conf)
 
 if __name__ == "__main__":
