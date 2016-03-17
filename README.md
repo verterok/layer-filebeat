@@ -47,7 +47,7 @@ The message for each unit will provide information about that unit's state.
 Once they all indicate that they are ready, you can navigate to the kibana
 url and view the streamed log data from the Ubuntu host.
 
-  juju status kibana
+    juju status kibana --format=yaml | grep public-address
 
   open http://&lt;kibana-ip&gt;/ in a browser and begin creating your dashboard
   visualizations
