@@ -1,3 +1,2 @@
 includes:
-  - 'layer:basic'
-  - 'interface:elastic-beats'
+  - 'layer:beats-base'
