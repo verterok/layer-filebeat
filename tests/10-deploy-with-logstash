@@ -1,0 +1,30 @@
+#!/usr/bin/python3
+
+import amulet
+import unittest
+import yaml
+
+
+class TestCharm(unittest.TestCase):
+    def setUp(self):
+        self.d = amulet.Deployment()
+        self.d.add('ubuntu')
+        self.d.add('logstash')
+        self.d.add('filebeat')
+        self.d.add_relation('filebeat:beats-host', 'ubuntu:juju-info')
+        self.d.add_relation('filebeat:logstash', 'logstash:filebeat')
+
+        self.d.setup(timeout=900)
+        self.d.sentry.wait()
+
+        self.unit = self.d.sentry['filebeat'][0]
+
+    def test_logstash_host_in_templating(self):
+        stash_address = self.unit.relation('logstash', 'logstash:filebeat')['private_address']  # noqa
+        remote = self.unit.file_contents('/etc/filebeat/filebeat.yml')
+        filebeat_conf = yaml.safe_load(remote)
+        import pdb; pdb.set_trace()
+        self.assertTrue(stash_address in filebeat_conf)
+
+if __name__ == "__main__":
+    unittest.main()
