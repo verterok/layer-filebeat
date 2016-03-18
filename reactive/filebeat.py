@@ -52,6 +52,7 @@ def enlist_packetbeat():
 @when_not('filebeat.index.pushed')
 def push_filebeat_index(elasticsearch):
     hosts = elasticsearch.list_unit_data()
-    host_string = "{}:{}".format(hosts[0]['host'], hosts[0]['port'])
+    for host in hosts:
+        host_string = "{}:{}".format(host['host'], host['port'])
     push_beat_index(host_string, 'filebeat')
     set_state('filebeat.index.pushed')
