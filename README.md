@@ -19,9 +19,30 @@ Filebeat and Logstash
     juju add-relation filebeat logstash
 
 
+### Deploying the minimal Beats formation
+
+If you do not need log buffering and alternate transforms on your data thats
+being shipped to ElasticSearch you can simply deploy the 'beats-base' bundle
+which stands up Elasticsearch, Kibana, and the three known working Beats
+subordinate services.
+
+    juju deploy ~containers/bundle/beats-core
+    juju deploy ubuntu
+    juju add-relation filebeat:beats-host ubuntu
+    juju add-relation topbeat:beats-host ubuntu
+    juju add-relation packetbeat:beats-host ubuntu
+
+### A note about the beats-host relationship
+
+The Beats suite of charms leverage the implicit "juju-info" relation interface
+which is special and unique in the context of subordinates. This is what allows
+us to relate the beat to any host, but may have some display oddities in the
+juju-gui. Until this is resolved, it's recommended to relate beats to their
+principal services using the CLI
+
 ### Changing whats being shipped
 
-by default, the filebeat charm is setup to ship everything in:
+by default, the Filebeat charm is setup to ship everything in:
 
     /var/log/*/*.log
     /var/log/*.log
@@ -60,11 +81,11 @@ indexers, you can add-units to elasticsearch.
     juju add-unit elasticsearch
 
 You can also increase in multiples, for example: To increase the number of
-logstash parser/buffer/shipping services:
+Logstash parser/buffer/shipping services:
 
     juju add-unit -n 2 logstash
 
-To monitor additional hosts, simply relate the filebeat subordinate
+To monitor additional hosts, simply relate the Filebeat subordinate
 
     juju add-relation filebeat:beats-host my-charm
 
