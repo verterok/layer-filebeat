@@ -7,12 +7,12 @@ import yaml
 
 class TestCharm(unittest.TestCase):
     def setUp(self):
-        self.d = amulet.Deployment()
-        self.d.add('ubuntu')
-        self.d.add('logstash')
+        self.d = amulet.Deployment(series='trusty')
+        self.d.add('ubuntu', 'cs:trusty/ubuntu')
+        self.d.add('logstash', 'cs:~containers/trusty/logstash-2')
         self.d.add('filebeat')
-        self.d.add_relation('filebeat:beats-host', 'ubuntu:juju-info')
-        self.d.add_relation('filebeat:logstash', 'logstash:filebeat')
+        self.d.relate('filebeat:beats-host', 'ubuntu:juju-info')
+        self.d.relate('filebeat:logstash', 'logstash:filebeat')
 
         self.d.setup(timeout=900)
         self.d.sentry.wait()
