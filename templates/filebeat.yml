@@ -37,7 +37,7 @@ output:
     bulk_max_size: 50
     timeout: 30
 {% endif %}
-{% if shipper %}
+{% if principal_unit %}
 shipper:
-  # name:
+  name: {{ principal_unit }}
 {% endif %}
