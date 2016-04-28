@@ -3,6 +3,8 @@ from charms.reactive import when_file_changed
 from charms.reactive import when_not
 from charms.reactive import set_state
 from charms.reactive import remove_state
+from charms.reactive import is_state
+
 
 from charmhelpers.core.hookenv import status_set
 from charmhelpers.core.host import service_restart
@@ -31,7 +33,8 @@ def render_filebeat_template():
 @when('config.changed.install_sources')
 @when('config.changed.install_keys')
 def reinstall_filebeat():
-    remove_state('filebeat.installed')
+    if is_state('elasticsearch.available') or is_state('logstash.available'):
+        remove_state('filebeat.installed')
 
 
 @when_file_changed('/etc/filebeat/filebeat.yml')
