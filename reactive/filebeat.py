@@ -33,14 +33,14 @@ def render_filebeat_template():
 @when('config.changed.install_sources')
 @when('config.changed.install_keys')
 def reinstall_filebeat():
-    if is_state('elasticsearch.available') or is_state('logstash.available'):
         remove_state('filebeat.installed')
 
 
 @when_file_changed('/etc/filebeat/filebeat.yml')
 def restart_filebeat():
     ''' Anytime we touch the config file, cycle the service'''
-    service_restart('filebeat')
+    if is_state('elasticsearch.available') or is_state('logstash.available'):
+        service_restart('filebeat')
 
 
 @when('filebeat.installed')
