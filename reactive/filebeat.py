@@ -8,7 +8,6 @@ from charms.reactive import remove_state
 
 from charmhelpers.core.hookenv import status_set
 from charmhelpers.core.host import service_restart
-from charmhelpers.fetch import apt_install
 
 from elasticbeats import render_without_context
 from elasticbeats import enable_beat_on_boot
