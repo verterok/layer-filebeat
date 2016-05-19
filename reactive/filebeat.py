@@ -1,5 +1,6 @@
 from charms.reactive import when
 from charms.reactive import when_not
+from charms.reactive import when_any
 from charms.reactive import set_state
 from charms.reactive import remove_state
 from charms.reactive import is_state
@@ -23,11 +24,11 @@ def install_filebeat():
 
 
 @when('beat.render')
+@when_any('elasticsearch.available', 'logstash.available')
 def render_filebeat_template():
     render_without_context('filebeat.yml', '/etc/filebeat/filebeat.yml')
     remove_state('beat.render')
-    if is_state('elasticsearch.available') or is_state('logstash.available'):
-        service_restart('filebeat')
+    service_restart('filebeat')
     status_set('active', 'Filebeat ready')
 
 
