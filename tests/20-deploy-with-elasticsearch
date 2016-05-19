@@ -4,6 +4,7 @@ import amulet
 import unittest
 import time
 
+
 class TestCharm(unittest.TestCase):
     def setUp(self):
         self.d = amulet.Deployment(series='trusty')
