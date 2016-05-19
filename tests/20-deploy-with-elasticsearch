@@ -2,6 +2,7 @@
 
 import amulet
 import unittest
+import time
 
 
 class TestCharm(unittest.TestCase):
@@ -30,6 +31,9 @@ class TestCharm(unittest.TestCase):
                           'harvester_buffer_size': '9999',
                           'max_bytes': '10485761'})
         self.d.sentry.wait()
+        # Changing the config variables just sets a "needs rendering" state.
+        # The actual file is updated later so we need to wait a bit.... :(
+        time.sleep(20)
         config = self.filebeat.file_contents('/etc/filebeat/filebeat.yml')
         self.assertTrue('/tmp/amulet.log' in config)
         self.assertTrue('9999' in config)

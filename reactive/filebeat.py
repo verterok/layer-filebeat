@@ -2,6 +2,7 @@ import charms.apt
 from charms.reactive import when
 from charms.reactive import when_any
 from charms.reactive import when_not
+from charms.reactive import when_any
 from charms.reactive import set_state
 from charms.reactive import remove_state
 
