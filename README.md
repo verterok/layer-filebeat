@@ -22,7 +22,7 @@ Filebeat and Logstash
 ### Deploying the minimal Beats formation
 
 If you do not need log buffering and alternate transforms on your data thats
-being shipped to ElasticSearch you can simply deploy the 'beats-base' bundle
+being shipped to ElasticSearch you can simply deploy the 'beats-core' bundle
 which stands up Elasticsearch, Kibana, and the three known working Beats
 subordinate services.
 
