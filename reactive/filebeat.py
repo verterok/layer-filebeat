@@ -15,7 +15,7 @@ from elasticbeats import push_beat_index
 
 @when_not('apt.installed.filebeat')
 def install_filebeat():
-    status_set('maintenance', 'Installing filebeat')
+    status_set('maintenance', 'Installing filebeat.')
     charms.apt.queue_install(['filebeat'])
 
 
@@ -25,7 +25,7 @@ def render_filebeat_template():
     render_without_context('filebeat.yml', '/etc/filebeat/filebeat.yml')
     remove_state('beat.render')
     service_restart('filebeat')
-    status_set('active', 'Filebeat ready')
+    status_set('active', 'Filebeat ready.')
 
 
 @when('apt.installed.filebeat')
