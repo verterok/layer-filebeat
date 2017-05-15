@@ -19,9 +19,9 @@ output:
 {% if logstash %}
   logstash:
     hosts:
-      {% for host in logstash %}
+      {% for host in logstash -%}
       - "{{ host }}"
-      {% endfor -%}
+      {% endfor %}
     worker: 1
     compression_level: 3
     loadbalance: true
