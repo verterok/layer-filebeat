@@ -16,11 +16,14 @@ filebeat:
 logging:
   to_syslog: true
 output:
-{% if logstash %}
+{% if logstash or logstash_hosts %}
   logstash:
     hosts:
       {% for host in logstash -%}
       - "{{ host }}"
+      {% endfor %}
+      {% for host in logstash_hosts.split(',') -%}
+      - "{{ host|trim }}"
       {% endfor %}
     worker: 1
     compression_level: 3

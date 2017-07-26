@@ -20,7 +20,7 @@ def install_filebeat():
 
 
 @when('beat.render')
-@when_any('elasticsearch.available', 'logstash.available')
+@when_any('elasticsearch.available', 'logstash.available', 'config.changed')
 def render_filebeat_template():
     render_without_context('filebeat.yml', '/etc/filebeat/filebeat.yml')
     remove_state('beat.render')

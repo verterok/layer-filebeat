@@ -11,6 +11,10 @@ options:
     type: string
     default: "/var/log/*.log /var/log/*/*.log"
     description: "Space separated log paths to monitor. Can contain wildcards."
+  logstash_hosts:
+    type: string
+    default: ""
+    description: "A comma separated list of logstash output hosts in addition to those from relations."
   harvester_buffer_size:
     type: int
     default: 16384
