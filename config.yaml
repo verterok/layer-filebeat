@@ -15,6 +15,10 @@ options:
     type: string
     default: ""
     description: "A comma separated list of logstash output hosts in addition to those from relations."
+  kafka_hosts:
+    type: string
+    default: ""
+    description: "A comma separated list of kafka output hosts in addition to those from relations."
   harvester_buffer_size:
     type: int
     default: 16384
