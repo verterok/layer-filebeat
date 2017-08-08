@@ -40,6 +40,13 @@ output:
     bulk_max_size: 50
     timeout: 30
 {% endif %}
+{% if kafka %}
+  kafka:
+    hosts:
+      {% for host in kafka -%}
+      - "{{ host }}"
+      {% endfor %}
+{% endif %}
 {% if principal_unit %}
 shipper:
   name: {{ principal_unit }}
