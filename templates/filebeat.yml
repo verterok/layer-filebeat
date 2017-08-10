@@ -51,6 +51,7 @@ output:
       - "{{ host|trim }}"
       {% endfor %}
       {% endif %}
+    topic: "{{kafka_topic}}"
 {% endif %}
 {% if principal_unit %}
 shipper:
