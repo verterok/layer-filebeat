@@ -49,10 +49,14 @@ output:
       {%- if kafka_hosts -%}
       {% for host in kafka_hosts.split(',') -%}
       - "{{ host|trim }}"
-      {% endfor %}
-      {% endif %}
+      {% endfor -%}
+      {%- endif %}
     topic: "{{kafka_topic}}"
-{% endif %}
+    {%- if kafka_topics %}
+    topics:
+{{kafka_topics|indent(width=6, indentfirst=true)}}
+    {% endif %}
+{% endif -%}
 {% if principal_unit %}
 shipper:
   name: {{ principal_unit }}
