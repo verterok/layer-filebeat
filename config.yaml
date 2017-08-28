@@ -11,6 +11,10 @@ options:
     type: string
     default: "/var/log/*.log /var/log/*/*.log"
     description: "Space separated log paths to monitor. Can contain wildcards."
+  logging_to_syslog:
+    type: boolean
+    description: "Send filebeat logs to syslog https://www.elastic.co/guide/en/beats/filebeat/master/configuration-logging.html#_literal_to_syslog_literal"
+    default: true
   logstash_hosts:
     type: string
     default: ""

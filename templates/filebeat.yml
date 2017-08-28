@@ -14,7 +14,11 @@ filebeat:
       max_bytes: {{ max_bytes }}
   registry_file: /var/lib/filebeat/registry
 logging:
+  {% if logging_to_syslog %}
   to_syslog: true
+  {% endif %}
+  metrics.enabled: false
+
 output:
 {% if logstash or logstash_hosts %}
   logstash:
