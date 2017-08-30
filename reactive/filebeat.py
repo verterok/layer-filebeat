@@ -6,7 +6,7 @@ from charms.reactive import set_state
 from charms.reactive import remove_state
 
 from charmhelpers.core.hookenv import status_set
-from charmhelpers.core.host import service_restart
+from charmhelpers.core.host import restart_on_change
 
 from elasticbeats import render_without_context
 from elasticbeats import enable_beat_on_boot
@@ -19,11 +19,12 @@ def install_filebeat():
     charms.apt.queue_install(['filebeat'])
 
 
+@restart_on_change('/etc/filebeat/filebeat.yml', ['filebeat'])
 @when('beat.render')
+@when('apt.installed.filebeat')
 def render_filebeat_template():
     connections = render_without_context('filebeat.yml', '/etc/filebeat/filebeat.yml')
     remove_state('beat.render')
-    service_restart('filebeat')
     if connections:
         status_set('active', 'Filebeat ready.')
 
