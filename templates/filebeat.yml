@@ -8,7 +8,8 @@ filebeat:
         - {{ path }}
         {% endfor %}
       input_type: log
-      exclude_files: [".gz$"]
+      exclude_files: {{ exclude_files }}
+      exclude_lines: {{ exclude_lines }}
       scan_frequency: 10s
       harvester_buffer_size: {{ harvester_buffer_size }}
       max_bytes: {{ max_bytes }}
