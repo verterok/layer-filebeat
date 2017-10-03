@@ -16,7 +16,7 @@ filebeat:
       {% if fields -%}
       fields: 
         {% for fieldvalue in fields -%}
-        {{ fieldvalue.split(':')[0] }}: {{ fieldvalue.split(':')[1] }}
+        {{ fieldvalue.split(':')[0] }}: {{ fieldvalue.split(':')[-1] }}
         {% endfor %}  
       {% endif %}      
   registry_file: /var/lib/filebeat/registry
