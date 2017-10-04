@@ -4,13 +4,16 @@ from charms.reactive import when_any
 from charms.reactive import when_not
 from charms.reactive import set_state
 from charms.reactive import remove_state
+from charms.reactive import hook
 
 from charmhelpers.core.hookenv import status_set
-from charmhelpers.core.host import restart_on_change
+from charmhelpers.core.host import restart_on_change, service_stop
 
 from elasticbeats import render_without_context
 from elasticbeats import enable_beat_on_boot
 from elasticbeats import push_beat_index
+
+import os
 
 
 @when_not('apt.installed.filebeat')
@@ -45,3 +48,13 @@ def push_filebeat_index(elasticsearch):
         host_string = "{}:{}".format(host['host'], host['port'])
     push_beat_index(host_string, 'filebeat')
     set_state('filebeat.index.pushed')
+
+
+@hook('stop')
+def remove_filebeat():
+    service_stop('filebeat')
+    try:
+        os.remove('/etc/filebeat/filebeat.yml')
+    except OSError:
+        pass
+    charms.apt.purge('filebeat')
