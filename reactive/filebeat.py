@@ -22,7 +22,6 @@ def install_filebeat():
     charms.apt.queue_install(['filebeat'])
 
 
-
 @restart_on_change('/etc/filebeat/filebeat.yml', ['filebeat'])
 @when('beat.render')
 @when('apt.installed.filebeat')
