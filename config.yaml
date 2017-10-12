@@ -47,3 +47,7 @@ options:
     type: string
     default: "[]"
     description: A list of regular expressions to match the lines that you want Filebeat to exclude. https://www.elastic.co/guide/en/beats/filebeat/5.3/configuration-filebeat-options.html#exclude-lines
+  fields:
+    type: string
+    default: ""
+    description: "Space seperated list of key:value that the prospector will assign as field to each beat"
