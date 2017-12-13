@@ -34,7 +34,8 @@ filebeat:
       json.add_error_key: true
       multiline.pattern: '^\s'
       multiline.match: after
-      document_type: kube-logs
+      fields:
+        type: kube-logs
     {% endif %}
   registry_file: /var/lib/filebeat/registry
 logging:
