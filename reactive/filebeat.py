@@ -1,6 +1,5 @@
 import charms.apt
 from charms.reactive import when
-from charms.reactive import when_any
 from charms.reactive import when_not
 from charms.reactive import set_state
 from charms.reactive import remove_state
@@ -30,7 +29,9 @@ def install_filebeat():
 
 @when('beat.render')
 @when('apt.installed.filebeat')
-@restart_on_change('/etc/filebeat/filebeat.yml', ['filebeat'])
+@restart_on_change({
+    '/etc/filebeat/filebeat.yml': ['filebeat']
+    })
 def render_filebeat_template():
     connections = render_without_context('filebeat.yml', '/etc/filebeat/filebeat.yml')
     remove_state('beat.render')

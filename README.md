@@ -8,21 +8,20 @@ for centralized storage and analysis.
 ## Usage
 
 Filebeat can be added to any principal charm thanks to the wonders of being
-a subordinate charm. The following usage example will deploy the elk stack,
-so we can visualize our log data once we've established the link between
-Filebeat and Logstash
+a subordinate charm. The following usage example will deploy an ubuntu
+log source along with the elk stack so we can visualize our log data.
 
     juju deploy ~containers/bundle/elk-stack
+    juju deploy ~containers/filebeat
     juju deploy ubuntu
-    juju deploy ~containers/trusty/filebeat
     juju add-relation filebeat:beats-host ubuntu
     juju add-relation filebeat logstash
 
 
 ### Deploying the minimal Beats formation
 
-If you do not need log buffering and alternate transforms on your data thats
-being shipped to ElasticSearch you can simply deploy the 'beats-core' bundle
+If you do not need log buffering and alternate transforms on data that is
+being shipped to ElasticSearch, you can simply deploy the 'beats-core' bundle
 which stands up Elasticsearch, Kibana, and the three known working Beats
 subordinate services.
 
