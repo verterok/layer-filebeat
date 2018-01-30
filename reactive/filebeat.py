@@ -64,7 +64,7 @@ def render_filebeat_logstash_ssl_cert():
 
 @when('apt.installed.filebeat')
 @when_not('filebeat.autostarted')
-def enlist_packetbeat():
+def enlist_filebeat():
     enable_beat_on_boot('filebeat')
     set_state('filebeat.autostarted')
 
