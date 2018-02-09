@@ -12,9 +12,9 @@ Filebeat can be added to any principal charm thanks to the wonders of being
 a subordinate charm. The following usage example will deploy an ubuntu
 log source along with the elk stack so we can visualize our log data.
 
-    juju deploy ~containers/bundle/elk-stack
-    juju deploy ~containers/filebeat
-    juju deploy ubuntu
+    juju deploy ~elasticsearch-charmers/bundle/elk-stack
+    juju deploy xenial/filebeat
+    juju deploy xenial/ubuntu
     juju add-relation filebeat:beats-host ubuntu
     juju add-relation filebeat logstash
 
@@ -27,7 +27,7 @@ which stands up Elasticsearch, Kibana, and the known working Beats
 subordinate applications.
 
     juju deploy ~containers/bundle/beats-core
-    juju deploy ubuntu
+    juju deploy xenial/ubuntu
     juju add-relation filebeat:beats-host ubuntu
     juju add-relation topbeat:beats-host ubuntu
 
