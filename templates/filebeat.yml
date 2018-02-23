@@ -16,11 +16,12 @@ filebeat:
       fields:
         juju_model_name: {{ juju_model_name }}
         juju_model_uuid: {{ juju_model_uuid }}
+        juju_principal_unit: {{ juju_principal_unit }}
         {% if fields -%}
         {% for fieldvalue in fields -%}
         {{ fieldvalue.split(':')[0] }}: {{ fieldvalue.split(':')[-1] }}
         {% endfor %}
-      {% endif %}
+        {%- endif %}
     {% if kube_logs -%}
     -
       paths:
@@ -40,10 +41,11 @@ filebeat:
         type: kube-logs
     {% endif %}
   registry_file: /var/lib/filebeat/registry
+
 logging:
-  {% if logging_to_syslog %}
+  {% if logging_to_syslog -%}
   to_syslog: true
-  {% endif %}
+  {%- endif %}
   metrics.enabled: false
 
 output:
@@ -63,11 +65,11 @@ output:
     worker: 1
     compression_level: 3
     loadbalance: true
-    {% if logstash_ssl_cert and logstash_ssl_key %}
+    {% if logstash_ssl_cert and logstash_ssl_key -%}
     ssl.certificate_authorities: ["/etc/ssl/certs/filebeat-logstash.crt"]
     ssl.certificate: "/etc/ssl/certs/filebeat-logstash.crt"
     ssl.key: "/etc/ssl/private/filebeat-logstash.key"
-    {% endif %}
+    {%- endif %}
 {% endif %}
 {% if elasticsearch %}
   elasticsearch:
@@ -80,7 +82,7 @@ output:
     bulk_max_size: 50
     timeout: 30
 {% endif %}
-{% if kafka or kafka_hosts%}
+{% if kafka or kafka_hosts %}
   kafka:
     hosts:
       {% if kafka %}
@@ -98,7 +100,7 @@ output:
     topics:
 {{kafka_topics|indent(width=6, indentfirst=true)}}
     {% endif %}
-{% endif -%}
-{% if principal_unit %}
-name: {{ principal_unit }}
 {% endif %}
+{% if juju_principal_unit -%}
+name: {{ juju_principal_unit }}
+{%- endif %}
