@@ -30,7 +30,9 @@ def install_filebeat():
 @when('beat.render')
 @when('apt.installed.filebeat')
 @restart_on_change({
-    '/etc/filebeat/filebeat.yml': ['filebeat']
+    '/etc/filebeat/filebeat.yml': ['filebeat'],
+    LOGSTASH_SSL_CERT: ['filebeat'],
+    LOGSTASH_SSL_KEY: ['filebeat'],
     })
 def render_filebeat_template():
     connections = render_without_context('filebeat.yml', '/etc/filebeat/filebeat.yml')
@@ -40,12 +42,6 @@ def render_filebeat_template():
         status_set('active', 'Filebeat ready.')
 
 
-@when('beat.render')
-@when('apt.installed.filebeat')
-@restart_on_change({
-    LOGSTASH_SSL_CERT: ['filebeat'],
-    LOGSTASH_SSL_KEY: ['filebeat'],
-    })
 def render_filebeat_logstash_ssl_cert():
     logstash_ssl_cert = config().get('logstash_ssl_cert')
     logstash_ssl_key = config().get('logstash_ssl_key')
