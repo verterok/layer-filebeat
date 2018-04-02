@@ -4,6 +4,7 @@ from charms.reactive import when_not
 from charms.reactive import set_state
 from charms.reactive import remove_state
 from charms.reactive import hook
+from charms.reactive.helpers import data_changed
 from charms.templating.jinja2 import render
 
 from charmhelpers.core.hookenv import config, status_set
@@ -30,32 +31,39 @@ def install_filebeat():
 @when('beat.render')
 @when('apt.installed.filebeat')
 @restart_on_change({
-    '/etc/filebeat/filebeat.yml': ['filebeat']
+    '/etc/filebeat/filebeat.yml': ['filebeat'],
+    LOGSTASH_SSL_CERT: ['filebeat'],
+    LOGSTASH_SSL_KEY: ['filebeat'],
     })
 def render_filebeat_template():
     connections = render_without_context('filebeat.yml', '/etc/filebeat/filebeat.yml')
-    render_filebeat_logstash_ssl_cert()
+    # Ensure ssl files match config each time we render a new template
+    manage_filebeat_logstash_ssl()
     remove_state('beat.render')
     if connections:
         status_set('active', 'Filebeat ready.')
 
 
-@when('beat.render')
-@when('apt.installed.filebeat')
-@restart_on_change({
-    LOGSTASH_SSL_CERT: ['filebeat'],
-    LOGSTASH_SSL_KEY: ['filebeat'],
-    })
-def render_filebeat_logstash_ssl_cert():
+def manage_filebeat_logstash_ssl():
+    """Manage the ssl cert/key that filebeat uses to connect to logstash.
+
+    Create the cert/key files when both logstash_ssl options have been set;
+    update when either config option changes; remove if either gets unset.
+    """
     logstash_ssl_cert = config().get('logstash_ssl_cert')
     logstash_ssl_key = config().get('logstash_ssl_key')
     if logstash_ssl_cert and logstash_ssl_key:
-        render(template='{{ data }}',
-               context={'data': base64.b64decode(logstash_ssl_cert)},
-               target=LOGSTASH_SSL_CERT, perms=0o444)
-        render(template='{{ data }}',
-               context={'data': base64.b64decode(logstash_ssl_key)},
-               target=LOGSTASH_SSL_KEY, perms=0o400)
+        cert = base64.b64decode(logstash_ssl_cert).decode('utf8')
+        key = base64.b64decode(logstash_ssl_key).decode('utf8')
+
+        if data_changed('logstash_cert', cert):
+            render(template='{{ data }}',
+                   context={'data': cert},
+                   target=LOGSTASH_SSL_CERT, perms=0o444)
+        if data_changed('logstash_key', key):
+            render(template='{{ data }}',
+                   context={'data': key},
+                   target=LOGSTASH_SSL_KEY, perms=0o400)
     else:
         if not logstash_ssl_cert and os.path.exists(LOGSTASH_SSL_CERT):
             os.remove(LOGSTASH_SSL_CERT)
