@@ -32,9 +32,14 @@ filebeat:
       max_bytes: {{ max_bytes }}
       fields_under_root: true
       symlinks: true
-      json.message_key: log
-      json.keys_under_root: true
-      json.add_error_key: true
+      # NB: disable json decoding; setting any of these would result in the
+      # top 'message' key being removed, thereby breaking things like the
+      # graylog beats input. Consumers will need to do their own json decoding
+      # for now.
+      # - https://github.com/juju-solutions/layer-filebeat/issues/44
+      #json.message_key: log
+      #json.keys_under_root: true
+      #json.add_error_key: true
       multiline.pattern: '^\s'
       multiline.match: after
       fields:
