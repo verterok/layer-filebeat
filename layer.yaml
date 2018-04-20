@@ -1,3 +1,8 @@
 repo: https://github.com/juju-solutions/layer-filebeat.git
 includes:
   - 'layer:beats-base'
+options:
+  apt:
+    packages:
+      - filebeat
+    version_package: filebeat

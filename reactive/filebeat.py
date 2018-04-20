@@ -19,12 +19,15 @@ import base64
 import os
 
 
+FILEBEAT_CONFIG = '/etc/filebeat/filebeat.yml'
 LOGSTASH_SSL_CERT = '/etc/ssl/certs/filebeat-logstash.crt'
 LOGSTASH_SSL_KEY = '/etc/ssl/private/filebeat-logstash.key'
 
 
 @when_not('apt.installed.filebeat')
 def install_filebeat():
+    # The apt layer option will initially install filebeat, but we may need
+    # to reinstall if the apt flag is ever removed (e.g. the apt repo changes).
     status_set('maintenance', 'Installing filebeat.')
     charms.apt.queue_install(['filebeat'])
 
@@ -36,10 +39,9 @@ def install_filebeat():
     LOGSTASH_SSL_KEY: ['filebeat'],
     })
 def render_filebeat_template():
-    cfg_path = '/etc/filebeat/filebeat.yml'
-    cfg_original_hash = file_hash(cfg_path)
-    connections = render_without_context('filebeat.yml', cfg_path)
-    cfg_new_hash = file_hash(cfg_path)
+    cfg_original_hash = file_hash(FILEBEAT_CONFIG)
+    connections = render_without_context('filebeat.yml', FILEBEAT_CONFIG)
+    cfg_new_hash = file_hash(FILEBEAT_CONFIG)
 
     # Ensure ssl files match config each time we render a new template
     manage_filebeat_logstash_ssl()
@@ -99,11 +101,22 @@ def push_filebeat_index(elasticsearch):
     set_state('filebeat.index.pushed')
 
 
+@when('apt.installed.filebeat')
+@when('config.changed.install_sources')
+def reinstall_filebeat():
+    """Reinstall filebeat when the apt repository changes."""
+    # Use the same logic as the stop hook; purge filebeat and let the
+    # apt layer remove flags. This will re-trigger install_filebeat with the
+    # current apt repo.
+    remove_filebeat()
+
+
 @hook('stop')
 def remove_filebeat():
+    status_set('maintenance', 'Removing filebeat.')
     service_stop('filebeat')
     try:
-        os.remove('/etc/filebeat/filebeat.yml')
+        os.remove(FILEBEAT_CONFIG)
     except OSError:
         pass
     charms.apt.purge('filebeat')
