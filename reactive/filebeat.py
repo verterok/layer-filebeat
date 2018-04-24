@@ -1,4 +1,5 @@
 import charms.apt
+from charms.layer import status
 from charms.reactive import when
 from charms.reactive import when_not
 from charms.reactive import set_state
@@ -7,13 +8,18 @@ from charms.reactive import hook
 from charms.reactive.helpers import data_changed
 from charms.templating.jinja2 import render
 
-from charmhelpers.core.hookenv import config, status_set
+from charmhelpers.core import unitdata
+from charmhelpers.core.hookenv import config
 from charmhelpers.core.host import restart_on_change, service_stop
 from charmhelpers.core.host import file_hash, service
 
-from elasticbeats import render_without_context
-from elasticbeats import enable_beat_on_boot
-from elasticbeats import push_beat_index
+from elasticbeats import (
+    enable_beat_on_boot,
+    get_package_candidate,
+    push_beat_index,
+    remove_beat_on_boot,
+    render_without_context,
+)
 
 import base64
 import os
@@ -26,10 +32,19 @@ LOGSTASH_SSL_KEY = '/etc/ssl/private/filebeat-logstash.key'
 
 @when_not('apt.installed.filebeat')
 def install_filebeat():
-    # The apt layer option will initially install filebeat, but we may need
-    # to reinstall if the apt flag is ever removed (e.g. the apt repo changes).
-    status_set('maintenance', 'Installing filebeat.')
-    charms.apt.queue_install(['filebeat'])
+    # Our layer options will initially install filebeat, so just set a
+    # message while we wait for the apt layer to do its thing.
+    status.maint('Preparing to install filebeat.')
+
+
+@when('apt.installed.filebeat')
+@when('filebeat.reinstall')
+def blocked_until_reinstall():
+    """Block until the operator handles a pending reinstall."""
+    ver = unitdata.kv().get('filebeat.candidate.version', False)
+    if ver:
+        msg = "Install filebeat-{} with the 'reinstall' action.".format(ver)
+        status.blocked(msg)
 
 
 @when('beat.render')
@@ -50,10 +65,10 @@ def render_filebeat_template():
     if connections:
         if cfg_original_hash != cfg_new_hash:
             service('restart', 'filebeat')
-        status_set('active', 'Filebeat ready.')
+        status.active('Filebeat ready.')
     else:
+        # NB: beat base layer will handle waiting status when not connected
         service('stop', 'filebeat')
-        status_set('waiting', 'Waiting for connections.')
 
 
 def manage_filebeat_logstash_ssl():
@@ -103,20 +118,38 @@ def push_filebeat_index(elasticsearch):
 
 @when('apt.installed.filebeat')
 @when('config.changed.install_sources')
-def reinstall_filebeat():
-    """Reinstall filebeat when the apt repository changes."""
-    # Use the same logic as the stop hook; purge filebeat and let the
-    # apt layer remove flags. This will re-trigger install_filebeat with the
-    # current apt repo.
-    remove_filebeat()
+def change_filebeat_repo():
+    """Set a flag when the apt repo changes."""
+    # NB: we can't check for new versions yet because we cannot be sure that
+    # the apt update has completed. Set status and a flag to check later.
+    status.maint('Pending scan for apt repo changes.')
+    set_state('filebeat.repo.changed')
+
+
+@when('apt.installed.filebeat')
+@when('filebeat.repo.changed')
+@when_not('apt.needs_update')
+def check_filebeat_repo():
+    """Check the apt repo for filebeat changes."""
+    ver = get_package_candidate('filebeat')
+    if ver:
+        unitdata.kv().set('filebeat.candidate.version', ver)
+        set_state('filebeat.reinstall')
+    else:
+        unitdata.kv().unset('filebeat.candidate.version')
+        remove_state('filebeat.reinstall')
+    remove_state('filebeat.repo.changed')
 
 
 @hook('stop')
 def remove_filebeat():
-    status_set('maintenance', 'Removing filebeat.')
+    """Stop, purge, and remove all traces of filebeat."""
+    status.maint('Removing filebeat.')
     service_stop('filebeat')
     try:
         os.remove(FILEBEAT_CONFIG)
     except OSError:
         pass
     charms.apt.purge('filebeat')
+    remove_beat_on_boot('filebeat')
+    remove_state('filebeat.autostarted')
