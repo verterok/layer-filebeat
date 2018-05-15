@@ -11,7 +11,7 @@ class TestCharm(unittest.TestCase):
         self.d.add('kafka', 'cs:xenial/kafka')
         self.d.add('zookeeper', 'cs:xenial/zookeeper')
         self.d.add('filebeat')
-        self.d.relate('kafka', 'zookeeper')
+        self.d.relate('kafka:zookeeper', 'zookeeper:zookeeper')
         self.d.relate('filebeat:beats-host', 'ubuntu:juju-info')
         self.d.relate('filebeat:kafka', 'kafka:client')
 
