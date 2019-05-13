@@ -7,6 +7,9 @@ filebeat:
         {% for path in logpath -%}
         - {{ path }}
         {% endfor %}
+        {% if kube_logs -%}
+        - /root/cdk/audit/*.log
+        {%- endif %}
       input_type: log
       exclude_files: {{ exclude_files }}
       exclude_lines: {{ exclude_lines }}
@@ -22,10 +25,11 @@ filebeat:
         {{ fieldvalue.split(':')[0] }}: {{ fieldvalue.split(':')[-1] }}
         {% endfor %}
         {%- endif %}
-    {% if kube_logs -%}
+    {% if has_docker -%}
     -
       paths:
         - /var/log/containers/*.log
+      input_type: log
       exclude_files: ["filebeat.*log"]
       scan_frequency: 10s
       harvester_buffer_size: {{ harvester_buffer_size }}
