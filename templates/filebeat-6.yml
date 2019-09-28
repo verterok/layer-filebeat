@@ -28,11 +28,12 @@ filebeat:
         {{ fieldvalue.split(':')[0] }}: {{ fieldvalue.split(':')[-1] }}
         {% endfor %}
         {%- endif %}
-    {% if has_docker -%}
-    - type: docker
-      containers.ids: '*'
-      containers.path: '/var/lib/docker/containers'
-      symlinks: false
+    {% if has_containers -%}
+    - type: log
+      paths:
+        - "/var/log/containers/*.log"
+      symlinks: true
+      tail_files: true
       exclude_files: {{ exclude_files }}
       exclude_lines: {{ exclude_lines }}
       scan_frequency: 10s
@@ -54,6 +55,10 @@ filebeat:
       - add_kubernetes_metadata:
           in_cluster: false
           kube_config: /root/.kube/config
+          default_matchers.enabled: false
+          matchers:
+          - logs_path:
+              logs_path: /var/log/containers/
       {%- endif %}
     {%- endif %}
     {% if extra_inputs -%}
