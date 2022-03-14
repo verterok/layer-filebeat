@@ -17,6 +17,9 @@ filebeat:
       harvester_buffer_size: {{ harvester_buffer_size }}
       max_bytes: {{ max_bytes }}
       fields_under_root: false
+      {% if extra_configs_default_input -%}
+      {{ extra_configs_default_input|indent(6) }}
+      {% endif -%}
       fields:
         type: logpath-logs
         juju_model_name: {{ juju_model_name }}
