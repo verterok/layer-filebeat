@@ -8,8 +8,8 @@ from charms.reactive import hook
 from charms.reactive.helpers import data_changed
 
 from charmhelpers.core import unitdata
-from charmhelpers.core.hookenv import config, log
-from charmhelpers.core.host import restart_on_change, service_stop
+from charmhelpers.core.hookenv import config, log, status_set
+from charmhelpers.core.host import restart_on_change, service_stop, service_running
 from charmhelpers.core.host import file_hash, service
 
 from elasticbeats import (
@@ -195,3 +195,18 @@ def remove_filebeat():
     charms.apt.purge('filebeat')
     remove_beat_on_boot('filebeat')
     remove_state('filebeat.autostarted')
+
+
+@hook("update-status")
+def update_status():
+    """Handle update-status hook."""
+    log("Updating status.")
+
+    if service_running("filebeat"):
+        state = "active"
+        message = "Unit is ready"
+    else:
+        state = "blocked"
+        message = "filebeat service not running"
+
+    status_set(state, message)
