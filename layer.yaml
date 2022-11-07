@@ -2,6 +2,7 @@ repo: https://github.com/juju-solutions/layer-filebeat.git
 includes:
   - 'layer:beats-base'
   - 'layer:logrotate'
+  - 'layer:tls-client'
 options:
   apt:
     packages:
@@ -15,4 +16,5 @@ options:
       - weekly
       - compress
       - missingok
-
+  tls-client:
+    ca_certificate_path: /etc/ssl/certs/filebeat-logstash.crt
