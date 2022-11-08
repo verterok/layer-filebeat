@@ -80,12 +80,13 @@ def render_filebeat_template():
     cfg_original_hash = file_hash(FILEBEAT_CONFIG)
     connections = render_without_context(
         'filebeat-{}.yml'.format(version),
-        FILEBEAT_CONFIG
+        FILEBEAT_CONFIG,
+        { "logstash_ssl_cert": is_state('certificates.available') }
         )
     cfg_new_hash = file_hash(FILEBEAT_CONFIG)
 
-    # Ensure ssl files match config each time we render a new template
     manage_filebeat_logstash_ssl()
+    # Ensure ssl files match config each time we render a new template
     remove_state('beat.render')
 
     if connections:
