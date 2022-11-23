@@ -85,8 +85,8 @@ def render_filebeat_template():
         )
     cfg_new_hash = file_hash(FILEBEAT_CONFIG)
 
-    manage_filebeat_logstash_ssl()
     # Ensure ssl files match config each time we render a new template
+    manage_filebeat_logstash_ssl()
     remove_state('beat.render')
 
     if connections:
