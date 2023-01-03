@@ -1,10 +1,13 @@
 import charms.apt
 from charms.layer import status
-from charms.reactive import when
-from charms.reactive import when_not
-from charms.reactive import set_state
-from charms.reactive import remove_state
-from charms.reactive import hook
+from charms.reactive import (
+    hook,
+    is_state,
+    when,
+    when_not,
+    set_state,
+    remove_state
+)
 from charms.reactive.helpers import data_changed
 
 from charmhelpers.core import unitdata
@@ -29,7 +32,7 @@ FILEBEAT_CONFIG = '/etc/filebeat/filebeat.yml'
 KUBE_CONFIG = '/root/.kube/config'
 LOGSTASH_SSL_CERT = '/etc/ssl/certs/filebeat-logstash.crt'
 LOGSTASH_SSL_KEY = '/etc/ssl/private/filebeat-logstash.key'
-
+TLS_CLIENT_CA_PATH = '/etc/ssl/certs/filebeat-logstash.crt'
 
 @when_not('apt.installed.filebeat')
 def install_filebeat():
@@ -50,6 +53,7 @@ def blocked_until_reinstall():
 
 @when('beat.render')
 @when('apt.installed.filebeat')
+@when('certificates.available')
 @restart_on_change({
     LOGSTASH_SSL_CERT: ['filebeat'],
     LOGSTASH_SSL_KEY: ['filebeat'],
@@ -76,7 +80,8 @@ def render_filebeat_template():
     cfg_original_hash = file_hash(FILEBEAT_CONFIG)
     connections = render_without_context(
         'filebeat-{}.yml'.format(version),
-        FILEBEAT_CONFIG
+        FILEBEAT_CONFIG,
+        { "logstash_ssl_cert": is_state('certificates.available') }
         )
     cfg_new_hash = file_hash(FILEBEAT_CONFIG)
 
@@ -100,6 +105,9 @@ def manage_filebeat_logstash_ssl():
     Create the cert/key files when both logstash_ssl options have been set;
     update when either config option changes; remove if either gets unset.
     """
+    if is_state('certificates.available'):
+        return
+
     logstash_ssl_cert = config().get('logstash_ssl_cert')
     logstash_ssl_key = config().get('logstash_ssl_key')
     if logstash_ssl_cert and logstash_ssl_key:
@@ -210,3 +218,4 @@ def update_status():
         message = "filebeat service not running"
 
     status_set(state, message)
+
