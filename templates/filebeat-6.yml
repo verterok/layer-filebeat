@@ -142,3 +142,4 @@ seccomp:
     - action: allow
       names:
         - clone3
+        - rseq
